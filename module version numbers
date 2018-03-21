@@ -1,0 +1,61 @@
+##Trimming
+trimmomatic/0.36
+--current default
+  older versions available (20Mar18)
+    /0.33
+    /0.35
+
+
+##Indexing
+bwa/0.7.12
+--current default
+  newer avail (20Mar18)
+    /0.7.15
+
+
+##Aligning
+bwa/0.7.12
+--current default
+  newer avail (20Mar18)
+    /0.7.15
+
+samtools/1.6
+--current default
+  older avail (20Mar18)
+    /0.1.19
+    /1.2
+    /1.3
+    /1.4.1
+
+
+##RemovingDuplicates
+samtools/1.6
+--current default
+  older avail (20Mar18)
+    /0.1.19
+    /1.2
+    /1.3
+    /1.4.1
+
+
+##CallingSNPs
+samtools/1.6
+--current default
+  older avail (20Mar18)
+    /0.1.19
+    /1.2
+    /1.3
+    /1.4.1
+
+bcftools/1.6
+--current default
+  older avail (20Mar18)
+    /1.2
+    /1.3.1
+    /1.4.1
+
+##Filtering
+vcftools/0.1.13
+--current defult
+  newer avail (20Mar18)
+    /0.1.15

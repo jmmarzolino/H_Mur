@@ -1,0 +1,71 @@
+TIMELOG and POWER SETTINGS
+
+mur_trim
+time:  2-04:47
+      [53h]
+
+#SBATCH --nodes=8
+#SBATCH --ntasks=8
+#SBATCH --cpus-per-task=2
+#SBATCH --mem-per-cpu=25G
+#SBATCH --time=60:00:00
+
+
+
+mur_matching_reads
+time: queue 1:23:57
+        timeout 2-22:00:28
+
+      queue 3:02:16
+      complete 3-05:05:20
+      [74h]
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=10G
+#SBATCH --time=168:00:00
+
+
+
+mur_samtobam
+time: queue 00:00:17
+      complete 01:17:27
+      [1.5h]
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=20G
+#SBATCH --time=168:00:00
+
+
+
+mur_dup
+time: queue 00:00:12
+      complete 03:05:22
+      [3.5h]
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=20G
+#SBATCH --time=160:00:00
+
+
+mur_SNPs
+time: queue 00:00:18
+      complete 15:05:53
+      [15h]
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=20G
+#SBATCH --time=160:00:00
+
+mur_filter
+time: queue 00:00:11
+      complete
+      [h]
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=16
+#SBATCH --mem-per-cpu=20G
+#SBATCH --time=160:00:00
