@@ -1,0 +1,32 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1				# 99.999999999999% of the time this stays 1
+#SBATCH --ntasks=10				# number of CPU (threads) to use
+#SBATCH --cpus-per-task=1			# how many CPUs to assign to each task (almost always 1)
+#SBATCH --mem-per-cpu=1G			# how much memory to use per CPU. Total memory is mem-per-cpu * #CPUs
+#SBATCH --time=1-00:15:00			# how long your job will run; if job runs longer than deadline, truncates file
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/scripts/Hmur_001_fastqc.stdout 			# where to write the standard out file
+#SBATCH --mail-user=auyeh002@ucr.edu	# get emails for when your job starts and fails
+#SBATCH --mail-type=ALL 			# send all the possible emails
+#SBATCH --job-name="H_mur_FastQC"		# name that you'll see when checking on your running job
+#SBATCH -p intel 				# which partition to run on. Intel is default. Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h)
+
+
+
+#fastQC; goal is to check quality of h mur sequences
+
+
+#load module
+module load fastqc/0.11.7
+
+cd /rhome/auyeh/shared/SEQ_RUNS/10_2_2017/FASTQ/
+#fastqc --extract -o /rhome/auyeh/bigdata/H_mur/results/ flowcell718_lane1_pair*_AT*.fastq.gz
+
+#taken from https://jasonjwilliamsny.github.io/wrangling-genomics/01-automating_a_workflow.html
+for file in /rhome/auyeh/shared/SEQ_RUNS/10_2_2017/FASTQ/flowcell718_lane1_pair*_AT*.fastq.gz
+do
+  fastqc --extract -o /rhome/auyeh/bigdata/H_mur/results/ $file
+  echo "My file name is $file" > hmurFileNames.txt
+done
+
+#fastqc --extract -o /rhome/auyeh/bigdata/H_mur/results/ flowcell718_lane1_pair1_ATCACG.fastq.gz flowcell718_lane1_pair2_ATCACG.fastq.gz

@@ -1,0 +1,32 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=3-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_011_snpvarscan.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="snp_varscan"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+module load varscan/2.3.9
+module load samtools/1.9
+
+#build a mpileup file
+#samtools mpileup -f /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa  MAPPEDFILE > myData.mpileup #sorted and marked BAM file
+cd /rhome/auyeh/bigdata/H_mur/results/aligned/
+WD=/rhome/auyeh/bigdata/H_mur/results/aligned
+#or pipe directly to varscan
+samtools mpileup -f /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa  $WD/hmur_marked_duplicates_index.bam | \
+java -jar /opt/linux/centos/7.x/x86_64/pkgs/varscan/2.3.9/VarScan.v2.3.9.jar mpileup2cns \
+-min-coverage 3 \
+-min-reads2 2 \
+-min-avg-qual 10 \
+-min-var-freq 0.01 \
+-minfreq-for-hom 0.75 \
+-p-value 0.05 \
+-strand-filter 1 \
+-variants 1 \
+-output-vcf 1 > hmur_raw_snps_varscan.vcf

@@ -1,0 +1,74 @@
+#!/bin/bash -l
+
+#SBATCH --array=1-4
+#SBATCH --nodes=1
+#SBATCH --ntasks=5
+#SBATCH --mem=20G
+#SBATCH --time=0-06:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_004_stampy+bwa+RG_test.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="H_mur_testalign"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+
+########Data preparation before running script (done in shell)
+#https://www.biostars.org/p/75489/
+#make test data using same folders for real assessment
+  #zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair1_forward_paired.fq.gz | head -4000000 > /rhome/auyeh/bigdata/H_mur/results/TESTDATA_forward.fastq
+  #zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair2_reverse_paired.fq.gz | head -4000000 > /rhome/auyeh/bigdata/H_mur/results/TESTDATA_reverse.fastq
+
+#need to makdir hmur_paired_split
+#split paired data into multiple files by lines; must be multiple of four; four million lines means 1 million actual sequences
+  #zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair1_forward_paired.fq.gz | split -l 4000000 /rhome/auyeh/bigdata/H_mur/results/hmur_paired_split/hmur_F_paired_
+  #zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair2_reverse_paired.fq.gz | split -l 4000000 /rhome/auyeh/bigdata/H_mur/results/hmur_paired_split/hmur_R_paired_
+
+#split, input, output with suffix
+  #split -l 1000000 /rhome/auyeh/bigdata/H_mur/results/TESTDATA_forward.fastq /rhome/auyeh/bigdata/H_mur/results/hmur_paired_split/hmur_F_paired_
+  #split -l 1000000 /rhome/auyeh/bigdata/H_mur/results/TESTDATA_reverse.fastq /rhome/auyeh/bigdata/H_mur/results/hmur_paired_split/hmur_R_paired_
+
+
+
+###### mapping with bwa because stampy too slow for 250000
+#from the manual--
+module load bwa/0.7.17
+module load samtools/1.9
+module load stampy/1.0.2
+#1. create a BWA index for reference genome used by stampy, created into directory /rhome/auyeh/bigdata/H_mur_/results/aligned/
+/opt/linux/centos/7.x/x86_64/pkgs/bwa/0.7.17/bwa index /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa -p bwa_barley_split_ref
+#2. build genome file for STAMPY
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py --assembly=IBSC_v2 -G /rhome/auyeh/bigdata/H_mur/results/aligned/splitbarley_ref /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa
+#3 build hash table for STAMPY
+s/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g /rhome/auyeh/bigdata/H_mur/results/aligned/splitbarley_ref -H /rhome/auyeh/bigdata/H_mur/results/aligned/splitbarley_ref_h
+
+
+
+#4. set working directory
+HPS=/rhome/auyeh/bigdata/H_mur/results/hmur_paired_split
+#5. change directory into working directory; this is where the splitbarley_ref will sit
+cd $HPS
+#6. directory "filelists" to contain SEQLIST_F and SEQLIST_R; the variable SEQLIST_F is the file in the set directory
+SEQLIST_F=/rhome/auyeh/bigdata/H_mur/results/filelists/SEQLIST_F
+SEQLIST_R=/rhome/auyeh/bigdata/H_mur/results/filelists/SEQLIST_R
+#7. make the two SEQLIST files
+ls hmur_F_paired_* > $SEQLIST_F
+ls hmur_R_paired_* > $SEQLIST_R
+#8. for file in array n (1...n), take the last file (tail -n 1), and cut at the delimiter "." so will paste "hmur_F_paired_aa..." and put this into the file F or R respetively
+FILE_F=$(head -n $SLURM_ARRAY_TASK_ID $SEQLIST_F | tail -n 1 )
+FILE_R=$(head -n $SLURM_ARRAY_TASK_ID $SEQLIST_R | tail -n 1 )
+#print file name for checking
+echo $FILE_F
+echo $FILE_R
+#9. Map the reads using bwa and convert output to bam file with SAMTOOLS, Realign the bwa output with stampy and set divergence
+#pathtobwa option:mem -R assign read groups, use5threads referencegen read1.fq read2.fq > aln.sam
+#Read group assignment example from Jill "@RG\tID:${SEQR}_${SAMPLE}\tSM:${GEN}_pool\tPU:${SAMPLE}_${BAR}\tLB:lib1\tPL:ILLUMINA";
+#https://software.broadinstitute.org/gatk/documentation/article.php?id=6472 for definitions of ID, SM, etc.
+
+module load bwa/0.7.17
+bwa mem -R "@RG\tID:Hordeum_murinum_AG196-2_ATCACG\tSM:AG196-2\tPU:ATCACG_flowcell718_lane1\tLB:lib1\tPL:ILLUMINA" -t 5 /rhome/auyeh/bigdata/H_mur/results/aligned/bwa_barley_split_ref $FILE_F $FILE_R > hmur_bwa_"$SLURM_ARRAY_TASK_ID".sam
+module load samtools/1.9
+samtools view -b hmur_bwa_"$SLURM_ARRAY_TASK_ID".sam > hmur_bwa_"$SLURM_ARRAY_TASK_ID".bam
+
+OUTDIR=/rhome/auyeh/bigdata/H_mur/results/aligned
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g $OUTDIR/splitbarley_ref -h $OUTDIR/splitbarley_ref_h -t 5 --substitutionrate=0.01 --bamkeepgoodreads -M hmur_bwa_"$SLURM_ARRAY_TASK_ID".bam -o $OUTDIR/"$FILE_F".sam -f sam | samtools sort $OUTDIR/"$FILE_F".sam -o $OUTDIR/"$FILE_F"_sorted.bam

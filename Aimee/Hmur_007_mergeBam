@@ -1,0 +1,17 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=2-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_007_mergeBam.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="merged"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+cd /rhome/auyeh/bigdata/H_mur/results/aligned
+
+module load samtools/1.9
+
+samtools merge hmur_paired_sorted_merged.bam hmur_F_paired_*_sorted.bam

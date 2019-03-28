@@ -1,0 +1,27 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=4
+#SBATCH --mem=20G
+#SBATCH --time=3-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_011_snpGATK.stdout
+#SBATCH --error=/rhome/auyeh/bigdata/H_mur/results/Hmur_011_snpGATK.stderr
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="snp_gatk"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+module load gatk/4.0.12.0
+cd /rhome/auyeh/bigdata/H_mur/results/aligned/
+
+####use haplotype caller to call SNPs
+
+gatk HaplotypeCaller \
+  -R /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa \
+  -I hmur_marked_duplicates_index.bam \
+  -O hmur_raw_snps_gatk.g.vcf -ERC GVCF \
+  -RF AllowAllReadsReadFilter #this might be important because first run filtered out all the reads, finished in 30 min, and there were no results
+
+
+ 

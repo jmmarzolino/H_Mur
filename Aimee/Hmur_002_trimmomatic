@@ -1,0 +1,38 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=5
+#SBATCH --mem=200G
+#SBATCH --time=1-00:00:00			# Day-hour:minute:sec how long your job will run; if job runs longer than deadline, truncates file
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_002_fulltrimmomatic.stdout 			# where to write the standard out file
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="H_mur_trimmomatic"
+#SBATCH -p highmem 		# which partition to run on. Intel is default. Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+
+#trimmomatic; goal is to remove adapters and poor quality ends to increase the number of mappable reads
+
+
+#load module
+module load trimmomatic/0.36
+
+###subset data for faster test
+#zcat /rhome/auyeh/shared/SEQ_RUNS/10_2_2017/FASTQ/flowcell718_lane1_pair1_ATCACG.fastq.gz | head -1000 > /rhome/auyeh/bigdata/H_mur/data/DataSubset/Hmursubpair1.fastq
+#zcat /rhome/auyeh/shared/SEQ_RUNS/10_2_2017/FASTQ/flowcell718_lane1_pair2_ATCACG.fastq.gz | head -1000  > /rhome/auyeh/bigdata/H_mur/data/DataSubset/Hmursubpair2.fastq
+
+#these files were then rezipped to allow trimmomatic to work gzip filename in cluster
+
+
+#used below script for test file, but diff directories below
+#DIRECTORYIN=/rhome/auyeh/bigdata/H_mur/data/DataSubset
+#DIRECTORYOUT=/rhome/auyeh/bigdata/H_mur/data/DataSubset/DataSubsetResults
+#also file output names were hmur_lane1pair1_forward_paired etc.
+
+
+
+#running on full hmur sequences (not subsetted)
+DIRECTORYIN=/rhome/auyeh/shared/SEQ_RUNS/10_2_2017/FASTQ
+DIRECTORYOUT=/rhome/auyeh/bigdata/H_mur/results
+java -jar /opt/linux/centos/7.x/x86_64/pkgs/trimmomatic/0.36/trimmomatic.jar PE $DIRECTORYIN/flowcell718_lane1_pair1_ATCACG.fastq.gz $DIRECTORYIN/flowcell718_lane1_pair2_ATCACG.fastq.gz $DIRECTORYOUT/hmur_lane1pair1_forward_paired.fq.gz $DIRECTORYOUT/hmur_lane1pair1_forward_unpaired.fq.gz $DIRECTORYOUT/hmur_lane1pair2_reverse_paired.fq.gz $DIRECTORYOUT/hmur_lane1pair2_reverse_unpaired.fq.gz ILLUMINACLIP:/rhome/cfisc004/software/Trimmomatic-0.36/adapters/PE_all.fa:2:30:10 SLIDINGWINDOW:4:20 MINLEN:75

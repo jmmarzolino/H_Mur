@@ -1,0 +1,24 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_010_GATKcoverage.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="coverage"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+module load picard/2.18.3
+
+java -jar /opt/linux/centos/7.x/x86_64/pkgs/picard/2.18.3/lib/picard.jar -h
+
+cd /rhome/auyeh/bigdata/H_mur/results/aligned/
+
+#calculate metrics for the original alignment
+java -jar /opt/linux/centos/7.x/x86_64/pkgs/picard/2.18.3/lib/picard.jar CollectMultipleMetrics \
+I=/rhome/auyeh/bigdata/H_mur/results/aligned/hmur_paired_sorted_merged_final.bam \
+O=hmur_multiple_metrics \
+R=/rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa

@@ -1,0 +1,49 @@
+#!/bin/bash -l
+
+#SBATCH --array=1-293
+#SBATCH --nodes=1
+#SBATCH --ntasks=10
+#SBATCH --mem=20G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_006_mapping_bwa+stampy.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="H_mur_alignment"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+module load bwa/0.7.17
+module load samtools/1.9
+module load stampy/1.0.2
+
+#1. create a BWA index for reference genome used by stampy, created into directory /rhome/auyeh/bigdata/H_mur_/results/aligned/
+/opt/linux/centos/7.x/x86_64/pkgs/bwa/0.7.17/bwa index /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa -p bwa_barley_split_ref
+#2. build genome file for STAMPY
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py --assembly=IBSC_v2 -G /rhome/auyeh/bigdata/H_mur/results/aligned/splitbarley_ref /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa
+#3 build hash table for STAMPY
+s/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g /rhome/auyeh/bigdata/H_mur/results/aligned/splitbarley_ref -H /rhome/auyeh/bigdata/H_mur/results/aligned/splitbarley_ref_h
+
+#split_hmur_paired
+HPS=/rhome/auyeh/bigdata/H_mur/results/split_hmur_paired
+cd $HPS
+
+SEQLIST_F=/rhome/auyeh/bigdata/H_mur/results/filelists/SEQLIST_F
+SEQLIST_R=/rhome/auyeh/bigdata/H_mur/results/filelists/SEQLIST_R
+
+ls hmur_F_paired_* > $SEQLIST_F
+ls hmur_R_paired_* > $SEQLIST_R
+
+FILE_F=$(head -n $SLURM_ARRAY_TASK_ID $SEQLIST_F | tail -n 1 )
+FILE_R=$(head -n $SLURM_ARRAY_TASK_ID $SEQLIST_R | tail -n 1 )
+
+echo $FILE_F
+echo $FILE_R
+
+module load bwa/0.7.17
+bwa mem -R "@RG\tID:Hordeum_murinum_AG196-2_ATCACG\tSM:AG196-2\tPU:ATCACG_flowcell718_lane1\tLB:lib1\tPL:ILLUMINA" -t 10 /rhome/auyeh/bigdata/H_mur/results/aligned/bwa_barley_split_ref $FILE_F $FILE_R > hmur_bwa_"$SLURM_ARRAY_TASK_ID".sam
+module load samtools/1.9
+samtools view -b hmur_bwa_"$SLURM_ARRAY_TASK_ID".sam > hmur_bwa_"$SLURM_ARRAY_TASK_ID".bam
+
+OUTDIR=/rhome/auyeh/bigdata/H_mur/results/aligned
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g $OUTDIR/splitbarley_ref -h $OUTDIR/splitbarley_ref_h -t 10 --substitutionrate=0.01 --bamkeepgoodreads -M hmur_bwa_"$SLURM_ARRAY_TASK_ID".bam -f sam | \
+samtools sort -o $OUTDIR/"$FILE_F"_sorted.bam

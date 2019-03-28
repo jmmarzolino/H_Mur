@@ -1,0 +1,29 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=2-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_008_validateBamfile.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="validatebamfile"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+module load picard/2.18.3
+
+##test to see if file path works for picard
+#java -jar /opt/linux/centos/7.x/x86_64/pkgs/picard/2.18.3/lib/picard.jar -h
+
+cd /rhome/auyeh/bigdata/H_mur/results/aligned
+
+##VALIDATE SAM FILE https://gatkforums.broadinstitute.org/gatk/discussion/7571/errors-in-sam-bam-files-can-be-diagnosed-with-validatesamfile; should output 'no errors found'
+#jvm argument specified how much memory of jvm needed (setting recommended by broad institute)
+java -jar /opt/linux/centos/7.x/x86_64/pkgs/picard/2.18.3/lib/picard.jar ValidateSamFile \
+  I=hmur_paired_sorted_merged_final.bam \
+  MODE=SUMMARY
+
+  java -jar /opt/linux/centos/7.x/x86_64/pkgs/picard/2.18.3/lib/picard.jar ValidateSamFile \
+    I=hmur_paired_sorted_merged_final.bam \
+    IGNORE_WARNINGS=true \
+    MODE=VERBOSE

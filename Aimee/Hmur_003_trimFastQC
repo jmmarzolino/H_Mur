@@ -1,0 +1,28 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=5
+#SBATCH --mem=200G
+#SBATCH --time=0-14:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_003_trimFastQC.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="H_mur_trimFastQC"
+#SBATCH -p highmem 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+
+#fastQC; goal is to check quality of h mur sequences after trimmomatic run
+
+
+#load module
+module load fastqc/0.11.7
+
+cd /rhome/auyeh/bigdata/H_mur/results/
+
+for file in /rhome/auyeh/bigdata/H_mur/results/*.fq.gz
+do
+  fastqc --extract -o /rhome/auyeh/bigdata/H_mur/results/ $file
+  echo "My file name is $file" > Hmur_003_filenames.txt
+done
+
+#fastqc --extract -o /rhome/auyeh/bigdata/H_mur/results/ flowcell718_lane1_pair1_ATCACG.fastq.gz flowcell718_lane1_pair2_ATCACG.fastq.gz

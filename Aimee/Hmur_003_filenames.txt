@@ -1,0 +1,1 @@
+My file name is /rhome/auyeh/bigdata/H_mur/results/*.fq.gz

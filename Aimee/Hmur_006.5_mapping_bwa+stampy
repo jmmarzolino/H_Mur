@@ -1,0 +1,27 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_006.5_mapping_bwa+stampy.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="H_mur_alignment_ab"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+HPS=/rhome/auyeh/bigdata/H_mur/results/split_hmur_paired
+cd $HPS
+
+FILE_F=$HPS/hmur_F_paired_ab
+FILE_R=$HPS/hmur_R_paired_ab
+
+module load bwa/0.7.17
+bwa mem -R "@RG\tID:Hordeum_murinum_AG196-2_ATCACG\tSM:AG196-2\tPU:ATCACG_flowcell718_lane1\tLB:lib1\tPL:ILLUMINA" -t 1 /rhome/auyeh/bigdata/H_mur/results/aligned/bwa_barley_split_ref $FILE_F $FILE_R > hmur_bwa_ab.sam
+module load samtools/1.9
+samtools view -b hmur_bwa_ab.sam > hmur_bwa_ab.bam
+
+module load stampy/1.0.2
+OUTDIR=/rhome/auyeh/bigdata/H_mur/results/aligned
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g $OUTDIR/splitbarley_ref -h $OUTDIR/splitbarley_ref_h -t 1 --substitutionrate=0.01 --bamkeepgoodreads -M hmur_bwa_ab.bam -f sam | \
+samtools sort -o $OUTDIR/hmur_F_paired_ab_sorted.bam

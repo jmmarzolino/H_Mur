@@ -1,0 +1,14 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=0-03:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_005_splitdata.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="H_mur_splitdata"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair1_forward_paired.fq.gz | split -l 4000000 - /rhome/auyeh/bigdata/H_mur/results/split_hmur_paired/hmur_F_paired_
+zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair2_reverse_paired.fq.gz | split -l 4000000 - /rhome/auyeh/bigdata/H_mur/results/split_hmur_paired/hmur_R_paired_

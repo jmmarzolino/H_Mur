@@ -1,0 +1,23 @@
+
+
+#make test data from trimmed data
+
+#zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair1_forward_paired.fq.gz | head -1000000 > /rhome/auyeh/bigdata/H_mur/data/DataSubset/TESTDATA_forward.fastq
+#zcat /rhome/auyeh/bigdata/H_mur/results/hmur_lane1pair2_reverse_paired.fq.gz | head -1000000 > /rhome/auyeh/bigdata/H_mur/data/DataSubset/TESTDATA_reverse.fastq
+#wc -l TESTDATA.fastq
+
+module load stampy/1.0.2
+#https://www.well.ox.ac.uk/files-library/readme.txt
+#https://wiki.gacrc.uga.edu/wiki/STAMPY
+#first build a genome file
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py --species=barley \ -G splitbarley /rhome/auyeh/shared/GENOMES/NEW_BARLEY/GENOME_SPLIT/barley_split_reference.fa
+#build a hash table
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g splitbarley -H splitbarley
+#goal-- time how long to align 1000000 reads
+/opt/linux/centos/7.x/x86_64/pkgs/stampy/1.0.28/stampy.py -g splitbarley -h splitbarley -M /rhome/auyeh/bigdata/H_mur/data/DataSubset/TESTDATA_forward.fastq \ /rhome/auyeh/bigdata/H_mur/data/DataSubset/TESTDATA_reverse.fastq
+
+
+#because splitting big file into many little files, need to use an array job (allows you to submit one job instead of submitting hundreds)
+
+#set variables that contain the path to directories containing the forward and reverse split hmurFileNames
+SEQLIST_F= /rhome/auyeh/bigdata/H_mur/results/hmur_split/

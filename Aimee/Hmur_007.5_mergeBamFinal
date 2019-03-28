@@ -1,0 +1,24 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=2-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_007_mergeBamFinal.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="index"
+#SBATCH -p intel 	 #Options:  intel, batch, highmem (200 Gb memory), gpu, short (jobs with wall time of 2 h) check with squeue -p PARTITIONNAME
+
+cd /rhome/auyeh/bigdata/H_mur/results/aligned
+
+module load samtools/1.9
+
+#needed to remake ab_sorted because of overwrite problem. Now merging ab sorted to all files.
+samtools merge hmur_paired_sorted_merged_final.bam hmur_paired_sorted_merged.bam hmur_F_paired_ab_sorted.bam
+
+#index complete merged bam using samtools
+
+samtools index -b hmur_paired_sorted_merged_final.bam hmur_paired_sorted_merged_final
+
+samtools view -H sample.bam | grep '@RG'

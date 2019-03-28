@@ -1,0 +1,16 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=1-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_010_MAPQvalues.stdout
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="mapq"
+#SBATCH -p intel
+
+
+module load samtools/1.9
+cd /rhome/auyeh/bigdata/H_mur/results/aligned/
+samtools view hmur_paired_sorted_merged_final.bam | cut -d$'\t' -f5 > MAPQvalues.txt
