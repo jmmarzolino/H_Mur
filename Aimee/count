@@ -1,0 +1,20 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=20G
+#SBATCH --time=0-12:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/count.stdout
+#SBATCH --error=/rhome/auyeh/bigdata/H_mur/results/count.stderr
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="count"
+#SBATCH -p short
+
+
+module load samtools/1.9
+
+cd /rhome/auyeh/bigdata/H_mur/results/aligned
+
+echo "Number of mapped reads"
+samtools view hmur_marked_duplicates_index.bam | grep -c "^NB" -

@@ -17,6 +17,7 @@ module load bcftools/1.8
 #bcftools query -f '%CHROM\t%POS\t[%DP]\n' hmur_snps_varscan_flt1.vcf > PostnReadDepth_flt1.txt
 
 #after filter 1, check distribution of AD, FREQ, ABQ
+#bcftools query -f '%CHROM\t%POS\t[%AD]\t[%FREQ]\t[%ABQ]\n' hmur_snps_varscan_MQ_flt1.vcf > AD_FREQ_ABQ_MQflt.txt
 #bcftools query -f '%CHROM\t%POS\t[%RDF]\t[%RDR]\t[%ADF]\t[%ADR]\n' hmur_snps_varscan_flt1.vcf > AD_FREQ_ABQ_f1.txt
 
 #count variants remaining
@@ -26,16 +27,16 @@ module load bcftools/1.8
 #run a filter on DP and N_ALT=1
 cd /rhome/auyeh/bigdata/H_mur/results/aligned/
 
-bcftools view -e 'ABQ<30' -o hmur_snps_varscan_flt2.vcf hmur_snps_varscan_flt1.vcf
+bcftools view -e 'ABQ<30' -o hmur_snps_varscan_MQ_flt2.vcf hmur_snps_varscan_MQ_flt1.vcf
 
 echo "Variant count after filter2-- exclude ABQ<30"
-grep -c "^chr" hmur_snps_varscan_flt2.vcf
+grep -c "^chr" hmur_snps_varscan_MQ_flt2.vcf
 
-echo "Number of variants = reference & fixed... creating txt file"
-bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' hmur_snps_varscan_flt2.vcf > RD_AD_f2.txt
+echo "Number of variants = reference & fixed... creating txt file 'RD_AD_f2_MQ.txt'"
+bcftools query -f '%CHROM\t%POS\t%REF\t%ALT\t[%RD]\t[%AD]\n' hmur_snps_varscan_MQ_flt2.vcf > RD_AD_f2_MQ.txt
 
-echo "...creating vcf file for fixed and NOT reference"
-bcftools view -i 'FREQ>99 & AD>0' -o hmur_fixed_ntREF.vcf hmur_snps_varscan_flt2.vcf
+echo "...creating vcf file 'hmur_fixed_ntREF_MQ.vcf' for fixed and NOT reference"
+bcftools view -i 'FREQ>99 & AD>0' -o hmur_fixed_ntREF_MQ.vcf hmur_snps_varscan_MQ_flt2.vcf
 
-echo "...creating vcf file for fixed AND reference"
-bcftools view -i 'FREQ>99 & RD>0' -o hmur_fixed_REF.vcf hmur_snps_varscan_flt2.vcf
+echo "...creating vcf file 'hmur_fixed_REF_MQ.vcf' for fixed AND reference"
+bcftools view -i 'FREQ>99 & RD>0' -o hmur_fixed_REF_MQ.vcf hmur_snps_varscan_MQ_flt2.vcf

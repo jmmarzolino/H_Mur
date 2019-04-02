@@ -1,0 +1,24 @@
+#!/bin/bash -l
+
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=300G
+#SBATCH --time=3-0:00:00
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_012_fltrBcftools3.stdout
+#SBATCH --error=/rhome/auyeh/bigdata/H_mur/results/Hmur_012_fltrBcftools3.stderr
+#SBATCH --mail-user=auyeh002@ucr.edu
+#SBATCH --mail-type=ALL
+#SBATCH --job-name="fltS3!!"
+#SBATCH -p highmem
+
+module load bcftools/1.8
+
+
+
+#run a filter on DP and N_ALT=1
+cd /rhome/auyeh/bigdata/H_mur/results/aligned/
+
+bcftools view -e 'FREQ<99' -o hmur_snps_varscan_MQ_flt3.vcf hmur_snps_varscan_MQ_flt2.vcf
+
+echo "Variant count after filter3-- exclude FREQ<99"
+grep -c "^chr" hmur_snps_varscan_MQ_flt3.vcf

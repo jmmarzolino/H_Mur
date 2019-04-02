@@ -4,14 +4,19 @@
 #SBATCH --ntasks=1
 #SBATCH --mem=300G
 #SBATCH --time=3-0:00:00
-#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_012_fltrBcftools.stdout
-#SBATCH --error=/rhome/auyeh/bigdata/H_mur/results/Hmur_012_fltrBcftools.stderr
+#SBATCH --output=/rhome/auyeh/bigdata/H_mur/results/Hmur_012_fltrBcftools_2.stdout
+#SBATCH --error=/rhome/auyeh/bigdata/H_mur/results/Hmur_012_fltrBcftools_2.stderr
 #SBATCH --mail-user=auyeh002@ucr.edu
 #SBATCH --mail-type=ALL
 #SBATCH --job-name="fltS1!!"
 #SBATCH -p highmem
 
 module load bcftools/1.8
+
+#make list of DP (Read depth @ position) to set initial filtering values
+#bcftools query -f '%CHROM\t%POS\t[%DP]\n' hmur_snps_varscan_flt1.vcf > PostnReadDepth_flt1.txt
+
+#bcftools query -f '%CHROM\t%POS\t[%DP]\n' hmur_raw_snps_varscan_MQflt.vcf > PostnReadDepth_MQ.txt
 
 #make list of DP (Read depth @ position) to set initial filtering values
 #bcftools query -f '%CHROM\t%POS\t[%DP]\n' hmur_snps_varscan_flt1.vcf > PostnReadDepth_flt1.txt
@@ -26,4 +31,4 @@ module load bcftools/1.8
 #run a filter on DP and N_ALT=1
 cd /rhome/auyeh/bigdata/H_mur/results/aligned/
 
-bcftools view -e 'DP>300 & N_ALT=1' -o hmur_snps_varscan_flt1.vcf hmur_raw_snps_varscan.vcf
+bcftools view -e 'DP>300 & N_ALT=1' -o hmur_snps_varscan_MQ_flt1.vcf hmur_raw_snps_varscan_MQflt.vcf
