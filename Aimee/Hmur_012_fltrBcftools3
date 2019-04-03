@@ -18,7 +18,7 @@ module load bcftools/1.8
 #run a filter on DP and N_ALT=1
 cd /rhome/auyeh/bigdata/H_mur/results/aligned/
 
-bcftools view -e 'FREQ<0.99' -o hmur_snps_varscan_MQ_flt3.vcf hmur_snps_varscan_MQ_flt2.vcf
+bcftools view -e '(AD/DP)<0.99' -o hmur_snps_varscan_MQ_flt3.vcf hmur_snps_varscan_MQ_flt2.vcf
 
 echo "Variant count after filter3-- exclude FREQ<99"
 grep -c "^chr" hmur_snps_varscan_MQ_flt3.vcf
